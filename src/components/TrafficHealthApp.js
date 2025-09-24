@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, AlertTriangle, Shield, Construction, Thermometer, Navigation, Settings, Bell, Activity, TrendingUp } from 'lucide-react';
 import Health from './Health';
+import Alert from './Alert';
 
 const TrafficHealthApp = () => {
-  const [currentPage, setCurrentPage] = useState('main'); // 'main' or 'health'
+  const [currentPage, setCurrentPage] = useState('main'); // 'main', 'health', or 'alert'
   const [currentTime, setCurrentTime] = useState(new Date());
   const [heatIndex, setHeatIndex] = useState(32); // Celsius
   const [temperature, setTemperature] = useState(33); // Celsius  
@@ -106,6 +107,11 @@ const TrafficHealthApp = () => {
   // If health page is selected, show the health component
   if (currentPage === 'health') {
     return <Health onBack={() => setCurrentPage('main')} />;
+  }
+
+  // If alert page is selected, show the alert component
+  if (currentPage === 'alert') {
+    return <Alert onBack={() => setCurrentPage('main')} />;
   }
 
   return (
@@ -329,7 +335,9 @@ const TrafficHealthApp = () => {
               <Navigation className="w-6 h-6 text-purple-600 group-hover:text-white mx-auto mb-2" />
               <span className="text-xs font-semibold text-gray-700 group-hover:text-white">Navigate</span>
             </button>
-            <button className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white transition-all group">
+            <button 
+              onClick={() => setCurrentPage('alert')}
+              className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white transition-all group">
               <Bell className="w-6 h-6 text-emerald-600 group-hover:text-white mx-auto mb-2" />
               <span className="text-xs font-semibold text-gray-700 group-hover:text-white">Alerts</span>
             </button>
