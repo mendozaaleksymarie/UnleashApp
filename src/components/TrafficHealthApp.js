@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, AlertTriangle, Shield, Construction, Thermometer, Navigation, Settings, Bell, Activity, TrendingUp } from 'lucide-react';
+import Health from './Health';
 
 const TrafficHealthApp = () => {
+  const [currentPage, setCurrentPage] = useState('main'); // 'main' or 'health'
   const [currentTime, setCurrentTime] = useState(new Date());
   const [heatIndex, setHeatIndex] = useState(32); // Celsius
   const [temperature, setTemperature] = useState(33); // Celsius  
@@ -100,6 +102,11 @@ const TrafficHealthApp = () => {
 
   const heatLevel = getHeatIndexLevel(heatIndex);
   const circularProgress = getCircularProgress(heatIndex);
+
+  // If health page is selected, show the health component
+  if (currentPage === 'health') {
+    return <Health onBack={() => setCurrentPage('main')} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-gray-100 p-4 relative overflow-hidden">
@@ -326,7 +333,9 @@ const TrafficHealthApp = () => {
               <Bell className="w-6 h-6 text-emerald-600 group-hover:text-white mx-auto mb-2" />
               <span className="text-xs font-semibold text-gray-700 group-hover:text-white">Alerts</span>
             </button>
-            <button className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white transition-all group">
+            <button 
+              onClick={() => setCurrentPage('health')}
+              className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white transition-all group">
               <Thermometer className="w-6 h-6 text-red-500 group-hover:text-white mx-auto mb-2" />
               <span className="text-xs font-semibold text-gray-700 group-hover:text-white">Health</span>
             </button>
