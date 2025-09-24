@@ -16,31 +16,31 @@ const Health = ({ onBack }) => {
     return () => clearInterval(timer);
   }, []);
 
-  // Breathing exercise timer
-  useEffect(() => {
-    if (breathingActive) {
-      const phases = [
-        { name: 'inhale', duration: 4000 },
-        { name: 'hold', duration: 4000 },
-        { name: 'exhale', duration: 6000 }
-      ];
+// Breathing exercise timer
+useEffect(() => {
+  if (breathingActive) {
+    const phases = [
+      { name: 'inhale', duration: 1000 },
+      { name: 'hold', duration: 1000 },
+      { name: 'exhale', duration: 1000 }
+    ];
+    
+    let currentPhaseIndex = 0;
+    const interval = setInterval(() => {
+      const phase = phases[currentPhaseIndex];
+      setBreathingPhase(phase.name);
       
-      let currentPhaseIndex = 0;
-      const interval = setInterval(() => {
-        const phase = phases[currentPhaseIndex];
-        setBreathingPhase(phase.name);
-        
-        setTimeout(() => {
-          currentPhaseIndex = (currentPhaseIndex + 1) % phases.length;
-          if (currentPhaseIndex === 0) {
-            setBreathingCount(prev => prev + 1);
-          }
-        }, phase.duration);
-      }, 14000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [breathingActive]);
+      setTimeout(() => {
+        currentPhaseIndex = (currentPhaseIndex + 1) % phases.length;
+        if (currentPhaseIndex === 0) {
+          setBreathingCount(prev => prev + 1);
+        }
+      }, phase.duration);
+    }, 3000); // Changed to 3000 (1+1+1 seconds)
+    
+    return () => clearInterval(interval);
+  }
+}, [breathingActive]);
 
   // Exercise timer
   useEffect(() => {
