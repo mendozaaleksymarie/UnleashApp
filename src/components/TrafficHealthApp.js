@@ -3,9 +3,10 @@ import { MapPin, AlertTriangle, Shield, Construction, Thermometer, Navigation, S
 
 const TrafficHealthApp = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [heatIndex, setHeatIndex] = useState(89);
-  const [temperature, setTemperature] = useState(92);
+  const [heatIndex, setHeatIndex] = useState(32); // Celsius
+  const [temperature, setTemperature] = useState(33); // Celsius  
   const [humidity, setHumidity] = useState(65);
+  const [location] = useState("Manila, Philippines");
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -15,71 +16,77 @@ const TrafficHealthApp = () => {
   // Simulate real-time data updates
   useEffect(() => {
     const interval = setInterval(() => {
-      setHeatIndex(prev => prev + (Math.random() - 0.5) * 2);
-      setTemperature(prev => prev + (Math.random() - 0.5) * 1.5);
+      setHeatIndex(prev => prev + (Math.random() - 0.5) * 1);
+      setTemperature(prev => prev + (Math.random() - 0.5) * 0.8);
       setHumidity(prev => Math.max(30, Math.min(90, prev + (Math.random() - 0.5) * 3)));
     }, 5000);
     return () => clearInterval(interval);
   }, []);
 
   const getHeatIndexColor = (index) => {
-    if (index < 80) return 'text-emerald-600 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200';
-    if (index < 90) return 'text-amber-600 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200';
-    if (index < 105) return 'text-orange-600 bg-gradient-to-r from-orange-50 to-red-50 border-orange-200';
+    if (index < 27) return 'text-emerald-600 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200';
+    if (index < 32) return 'text-amber-600 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200';
+    if (index < 40) return 'text-orange-600 bg-gradient-to-r from-orange-50 to-red-50 border-orange-200';
     return 'text-red-600 bg-gradient-to-r from-red-50 to-pink-50 border-red-200';
   };
 
   const getHeatIndexWarning = (index) => {
-    if (index < 80) return 'Safe conditions';
-    if (index < 90) return 'Caution advised';
-    if (index < 105) return 'Take frequent breaks';
+    if (index < 27) return 'Safe conditions';
+    if (index < 32) return 'Caution advised';
+    if (index < 40) return 'Take frequent breaks';
     return 'Extreme caution - limit exposure';
   };
 
   const getHeatIndexLevel = (index) => {
-    if (index < 80) return { level: 'NORMAL', color: 'text-emerald-600' };
-    if (index < 90) return { level: 'CAUTION', color: 'text-amber-600' };
-    if (index < 105) return { level: 'WARNING', color: 'text-orange-600' };
+    if (index < 27) return { level: 'NORMAL', color: 'text-emerald-600' };
+    if (index < 32) return { level: 'CAUTION', color: 'text-amber-600' };
+    if (index < 40) return { level: 'WARNING', color: 'text-orange-600' };
     return { level: 'DANGER', color: 'text-red-600' };
   };
 
-  // Circular progress for heat index with purple gradient
-  const getCircularProgress = (value, max = 120) => {
+  // Circular progress for heat index - stopwatch style
+  const getCircularProgress = (value, max = 50) => {
     const percentage = Math.min((value / max) * 100, 100);
-    const strokeDasharray = 2 * Math.PI * 45; // radius = 45
+    const strokeDasharray = 2 * Math.PI * 50; // radius = 50
     const strokeDashoffset = strokeDasharray - (strokeDasharray * percentage) / 100;
     
     return { strokeDasharray, strokeDashoffset, percentage };
   };
 
-  // Heat map bars
-  const getHeatMapBars = (currentIndex) => {
-    const hours = Array.from({ length: 12 }, (_, i) => {
-      const hour = i + 6; // Starting from 6 AM
-      const baseTemp = 75 + Math.sin((i / 12) * Math.PI * 2) * 15 + Math.random() * 10;
-      const isCurrentHour = i === 8; // Simulate current hour
+  // Get stopwatch color based on heat level
+  const getStopwatchColor = (index) => {
+    if (index < 27) return '#10b981'; // emerald-500
+    if (index < 32) return '#f59e0b'; // amber-500
+    if (index < 40) return '#f97316'; // orange-500
+    return '#ef4444'; // red-500
+  };
+
+  // Simplified temperature trend - single color
+  const getTemperatureTrend = () => {
+    const hours = Array.from({ length: 8 }, (_, i) => {
+      const hour = i + 8; // Starting from 8 AM
+      const baseTemp = 24 + Math.sin((i / 8) * Math.PI * 2) * 6 + Math.random() * 4;
+      const isCurrentHour = i === 4; // Simulate current hour
       return {
         hour: hour > 12 ? `${hour - 12}PM` : `${hour}AM`,
         temp: Math.round(baseTemp),
-        height: Math.min((baseTemp / 110) * 100, 100),
+        height: Math.min((baseTemp / 40) * 100, 100),
         isCurrent: isCurrentHour
       };
     });
     
     return hours.map((data, index) => (
       <div key={index} className="flex flex-col items-center">
-        <div className="h-16 w-6 bg-gray-100 rounded-full relative overflow-hidden shadow-inner">
+        <div className="h-12 w-4 bg-gray-100 rounded-full relative overflow-hidden">
           <div 
             className={`absolute bottom-0 w-full rounded-full transition-all duration-500 ${
-              data.isCurrent ? 'bg-gradient-to-t from-purple-600 to-purple-400' : 
-              data.temp < 80 ? 'bg-gradient-to-t from-emerald-500 to-emerald-300' :
-              data.temp < 90 ? 'bg-gradient-to-t from-amber-500 to-amber-300' :
-              data.temp < 105 ? 'bg-gradient-to-t from-orange-500 to-orange-300' : 'bg-gradient-to-t from-red-500 to-red-300'
+              data.isCurrent ? 'bg-purple-600' : 'bg-purple-400'
             }`}
             style={{ height: `${data.height}%` }}
           />
         </div>
-        <span className="text-xs text-gray-600 mt-1">{data.hour}</span>
+        <span className="text-xs text-gray-600 mt-1 font-medium">{data.temp}°</span>
+        <span className="text-xs text-gray-500">{data.hour}</span>
       </div>
     ));
   };
@@ -95,8 +102,13 @@ const TrafficHealthApp = () => {
   const circularProgress = getCircularProgress(heatIndex);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 p-4">
-      <div className="max-w-md mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border border-purple-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-gray-100 p-4 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute top-10 right-10 w-32 h-32 bg-purple-200 rounded-full opacity-20 blur-xl"></div>
+      <div className="absolute bottom-20 left-10 w-24 h-24 bg-indigo-200 rounded-full opacity-15 blur-lg"></div>
+      <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-purple-300 rounded-full opacity-20 blur-md"></div>
+      
+      <div className="max-w-md mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-200 relative z-10">
         {/* Header - Dark Purple Theme */}
         <div className="bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 px-6 py-5 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-indigo-600/20"></div>
@@ -108,7 +120,7 @@ const TrafficHealthApp = () => {
                 </div>
                 <div>
                   <h1 className="text-lg font-bold">TrafficGuard+</h1>
-                  <p className="text-purple-200 text-xs">Health-Aware Navigation</p>
+                  <p className="text-purple-200 text-xs">{location}</p>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -126,12 +138,12 @@ const TrafficHealthApp = () => {
           </div>
         </div>
 
-        {/* Heat Index Monitor - Enhanced Modern Design */}
-        <div className="p-6 bg-gradient-to-br from-white to-purple-50">
-          <div className="flex items-center justify-between mb-4">
+        {/* Heat Index Monitor - Minimalist Design */}
+        <div className="p-6 bg-white">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-lg">
-                <Activity className="w-4 h-4 text-purple-700" />
+              <div className="p-2 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-lg shadow-sm">
+                <Thermometer className="w-4 h-4 text-purple-700" />
               </div>
               <span className="font-semibold text-gray-800">Heat Index Monitor</span>
             </div>
@@ -139,73 +151,91 @@ const TrafficHealthApp = () => {
               {heatLevel.level}
             </span>
           </div>
-          
-          {/* Circular Progress Display */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="relative">
-              <svg width="120" height="120" className="transform -rotate-90 drop-shadow-sm">
+
+          {/* Minimalist Circular Progress */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="relative mb-4">
+              <svg width="140" height="140" className="transform -rotate-90">
                 <defs>
-                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="minimalistGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="rgb(147, 51, 234)" />
-                    <stop offset="50%" stopColor="rgb(168, 85, 247)" />
                     <stop offset="100%" stopColor="rgb(99, 102, 241)" />
                   </linearGradient>
                 </defs>
+                
+                {/* Background circle - very thin */}
                 <circle
-                  cx="60"
-                  cy="60"
-                  r="45"
+                  cx="70"
+                  cy="70"
+                  r="60"
                   stroke="rgb(243, 244, 246)"
-                  strokeWidth="8"
+                  strokeWidth="4"
                   fill="transparent"
                 />
+                
+                {/* Progress arc - clean and simple */}
                 <circle
-                  cx="60"
-                  cy="60"
-                  r="45"
-                  stroke="url(#progressGradient)"
-                  strokeWidth="8"
+                  cx="70"
+                  cy="70"
+                  r="60"
+                  stroke="url(#minimalistGradient)"
+                  strokeWidth="6"
                   fill="transparent"
                   strokeDasharray={circularProgress.strokeDasharray}
                   strokeDashoffset={circularProgress.strokeDashoffset}
                   strokeLinecap="round"
                   className="transition-all duration-700 ease-out"
                 />
+                
+                {/* Simple pointer dot */}
+                <circle 
+                  cx={70 + Math.cos((circularProgress.percentage / 100) * 2 * Math.PI - Math.PI / 2) * 60} 
+                  cy={70 + Math.sin((circularProgress.percentage / 100) * 2 * Math.PI - Math.PI / 2) * 60} 
+                  r="4" 
+                  fill="rgb(147, 51, 234)"
+                  className="transition-all duration-700 ease-out"
+                />
               </svg>
+              
+              {/* Clean center display */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-700 to-indigo-700 bg-clip-text text-transparent">{Math.round(heatIndex)}</span>
-                <span className="text-xs text-gray-500">°F</span>
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-1">TODAY</div>
+                  <div className="text-3xl font-light text-gray-800 mb-1">{Math.round(heatIndex)}°C</div>
+                </div>
+              </div>
+              
+              {/* Simple range indicators */}
+              <div className="absolute bottom-2 left-0 right-0 flex justify-between text-xs text-gray-400 px-4">
+                <span>0</span>
+                <span>50</span>
               </div>
             </div>
             
-            <div className="flex-1 ml-6">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
-                  <span className="text-sm text-gray-600">Temperature</span>
-                  <span className="font-semibold text-purple-700">{Math.round(temperature)}°F</span>
+            {/* Caution Advised Message */}
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200 shadow-sm">
+              <div className="flex items-center justify-center gap-2">
+                <div className="p-1 bg-gradient-to-r from-amber-100 to-orange-100 rounded-lg">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
                 </div>
-                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
-                  <span className="text-sm text-gray-600">Humidity</span>
-                  <span className="font-semibold text-purple-700">{Math.round(humidity)}%</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
-                  <span className="text-sm text-gray-600">Status</span>
-                  <span className={`font-semibold ${heatLevel.color}`}>{heatLevel.level}</span>
-                </div>
+                <span className="text-sm font-semibold text-amber-700">Caution Advised</span>
               </div>
+              <p className="text-xs text-amber-600 text-center mt-2">
+                Monitor heat levels and stay hydrated during travel
+              </p>
             </div>
           </div>
 
-          {/* 12-Hour Heat Trend */}
-          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-4 shadow-inner">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-1 bg-gradient-to-r from-purple-200 to-indigo-200 rounded-lg">
+          {/* 8-Hour Temperature Trend */}
+          <div className="bg-gradient-to-r from-gray-50 to-purple-50 rounded-2xl p-4 shadow-inner border border-gray-100">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-1 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-lg">
                 <TrendingUp className="w-3 h-3 text-purple-700" />
               </div>
-              <span className="text-sm font-medium text-gray-700">12-Hour Heat Trend</span>
+              <span className="text-sm font-medium text-gray-700">Today's Temperature Trend</span>
             </div>
-            <div className="flex items-end justify-between gap-1">
-              {getHeatMapBars(heatIndex)}
+            <div className="flex items-end justify-between gap-2">
+              {getTemperatureTrend()}
             </div>
           </div>
           
@@ -221,11 +251,11 @@ const TrafficHealthApp = () => {
         </div>
 
         {/* Current Route Status */}
-        <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100">
+        <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-gray-50 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-purple-600 font-medium">Current Route</p>
-              <p className="font-semibold text-gray-800 text-base">Home → Downtown Office</p>
+              <p className="font-semibold text-gray-800 text-base">Home → Makati CBD</p>
             </div>
             <div className="text-right">
               <div className="bg-gradient-to-r from-emerald-100 to-teal-100 px-3 py-2 rounded-full shadow-sm">
@@ -237,9 +267,9 @@ const TrafficHealthApp = () => {
         </div>
 
         {/* Traffic Alerts */}
-        <div className="p-6 bg-gradient-to-b from-white to-purple-25">
+        <div className="p-6 bg-gradient-to-b from-purple-50 to-purple-100/60">
           <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <div className="p-1 bg-gradient-to-r from-orange-100 to-red-100 rounded-lg">
+            <div className="p-1 bg-gradient-to-r from-orange-100 to-red-100 rounded-lg shadow-sm">
               <AlertTriangle className="w-4 h-4 text-orange-600" />
             </div>
             Live Traffic Alerts
@@ -275,7 +305,7 @@ const TrafficHealthApp = () => {
                         <span className="text-xs text-slate-500">{alert.time}</span>
                       </div>
                     </div>
-                    <button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs px-3 py-2 rounded-xl font-medium hover:from-purple-700 hover:to-indigo-700 transition-all shadow-sm">
+                    <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs px-4 py-2 rounded-xl font-medium hover:from-purple-700 hover:to-purple-800 transition-all shadow-sm">
                       Avoid
                     </button>
                   </div>
@@ -286,17 +316,17 @@ const TrafficHealthApp = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="p-6 bg-gradient-to-r from-purple-50 via-white to-indigo-50 border-t border-purple-100">
+        <div className="p-6 bg-white border-t border-gray-100">
           <div className="grid grid-cols-3 gap-4">
-            <button className="p-4 bg-white rounded-2xl shadow-sm border border-purple-100 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white transition-all group">
+            <button className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white transition-all group">
               <Navigation className="w-6 h-6 text-purple-600 group-hover:text-white mx-auto mb-2" />
               <span className="text-xs font-semibold text-gray-700 group-hover:text-white">Navigate</span>
             </button>
-            <button className="p-4 bg-white rounded-2xl shadow-sm border border-purple-100 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white transition-all group">
+            <button className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white transition-all group">
               <Bell className="w-6 h-6 text-emerald-600 group-hover:text-white mx-auto mb-2" />
               <span className="text-xs font-semibold text-gray-700 group-hover:text-white">Alerts</span>
             </button>
-            <button className="p-4 bg-white rounded-2xl shadow-sm border border-purple-100 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white transition-all group">
+            <button className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white transition-all group">
               <Thermometer className="w-6 h-6 text-red-500 group-hover:text-white mx-auto mb-2" />
               <span className="text-xs font-semibold text-gray-700 group-hover:text-white">Health</span>
             </button>
@@ -304,8 +334,8 @@ const TrafficHealthApp = () => {
         </div>
 
         {/* Health Reminder Footer */}
-        <div className="p-4 bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 text-white text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-indigo-600/20"></div>
+        <div className="p-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-400/30 to-indigo-400/30"></div>
           <p className="text-sm font-medium relative z-10">
             💜 Drive safely. Monitor your health. Stay hydrated.
           </p>
